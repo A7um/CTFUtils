@@ -40,6 +40,10 @@ class remote:
             if buf == '\n':
                 break
         return buf
+
+    def close(self):
+        self.sock.close()
+
     def interactive(self):
         print 'Switching to interative mode'
         go = threading.Event()
@@ -95,7 +99,13 @@ class process:
             if buf == '\n':
                 break
         return buf
- 
+    
+    def close(self):
+        try:
+            self.pipe.kill()
+        except OSError:
+            pass
+        
     def interactive(self):
         print 'Switching to interative mode'
         go = threading.Event()
