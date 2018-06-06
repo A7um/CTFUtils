@@ -1,16 +1,64 @@
 import subprocess 
 import threading, sys, os
 import socket
+import struct
+import binascii
+import base64
+
+version = 1.1
 '''
 this is a self defined class as a simple pwntool replacement
 when there is not intalled pwntool 
 '''
+def u64(data):
+    struct.unpack("<Q",data)[0]
 
-class remote:
-    def __init__(self, ip, port):
-        self.sock=socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.sock.connect((ip,port))
-        
+def u32(data):
+    struct.unpack("<I",data)[0]
+
+def u16(data):
+    struct.unpack("<H",data)[0]
+
+def p64(data):
+    struct.pack("<Q",data)
+
+def p32(data):
+    struct.pack("<I",data)
+
+def p16(data):
+    struct.pack("<H",data)
+
+def u64l(data):
+    struct.unpack(">Q",data)[0]
+
+def u32l(data):
+    struct.unpack(">I",data)[0]
+
+def u16l(data):
+    struct.unpack(">H",data)[0]
+
+def p64l(data):
+    struct.pack(">Q",data)
+
+def p32l(data):
+    struct.pack(">I",data)
+
+def p16l(data):
+    struct.pack(">H",data)
+
+def b64e(data):
+    return base64.b64encode(data)
+
+def b64d(data):
+    return base64.b64decode(data)
+
+def a2h(data):
+    return binascii.hexlify(data)
+
+def h2a(data):
+    return binascii.unhexlify(data)
+
+class socket_io(object):
     def sendline(self, delims):
         return self.sock.send(delims + '\n')
  
@@ -40,7 +88,6 @@ class remote:
             if buf == '\n':
                 break
         return buf
-
     def close(self):
         self.sock.close()
 
@@ -66,10 +113,16 @@ class remote:
                 self.send(data)
                 if data == '\n':
                     break
-                
+
+class remote(socket_io):
+    def __init__(self, ip, port):
+        self.sock=socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.sock.connect((ip,port))
+        
+    
 class process:
     def __init__(self, cmd):
-        self.pipe = subprocess.Popen(cmd, stdin = subprocess.PIPE, stdout = subprocess.PIPE,  shell = True)
+        self.pipe = subprocess.Popen(cmd, stdin = subprocess.PIPE, stdout = subprocess.PIPE)
     def sendline(self, delims):
         return self.pipe.stdin.write(delims + '\n')
  
@@ -99,13 +152,25 @@ class process:
             if buf == '\n':
                 break
         return buf
-    
+
     def close(self):
         try:
             self.pipe.kill()
         except OSError:
             pass
-        
+    def active(self):
+        go = threading.Event()
+        def recv_thread():
+            while not go.isSet():
+                try:
+                    cur = self.recv(1)
+                except EOFError:
+                    print 'Got EOF while reading in interactive'
+                    break
+        t = threading.Thread(target = recv_thread)
+        t.setDaemon(True)
+        t.start()
+
     def interactive(self):
         print 'Switching to interative mode'
         go = threading.Event()
@@ -129,4 +194,18 @@ class process:
                 if data == '\n':
                     break
 
+class conn(socket_io):
+    def __init__(self, sock, addr):
+        self.addr=addr
+        self.sock=sock
+        
+class server:
+    def __init__(self, ip, port):
+        self.sock=socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.sock.bind((ip,port))
+        self.sock.listen(5)
+    
+    def get_conn(self):
+        sock,addr=self.sock.accept()
+        return conn(sock,addr)
 
