@@ -11,40 +11,40 @@ this is a self defined class as a simple pwntool replacement
 when there is not intalled pwntool 
 '''
 def u64(data):
-    struct.unpack("<Q",data)[0]
+    return struct.unpack("<Q",data)[0]
 
 def u32(data):
-    struct.unpack("<I",data)[0]
+    return struct.unpack("<I",data)[0]
 
 def u16(data):
-    struct.unpack("<H",data)[0]
+    return struct.unpack("<H",data)[0]
 
 def p64(data):
-    struct.pack("<Q",data)
+    return struct.pack("<Q",data)
 
 def p32(data):
-    struct.pack("<I",data)
+    return struct.pack("<I",data)
 
 def p16(data):
-    struct.pack("<H",data)
+    return struct.pack("<H",data)
 
 def u64l(data):
-    struct.unpack(">Q",data)[0]
+    return struct.unpack(">Q",data)[0]
 
 def u32l(data):
-    struct.unpack(">I",data)[0]
+    return struct.unpack(">I",data)[0]
 
 def u16l(data):
-    struct.unpack(">H",data)[0]
+    return struct.unpack(">H",data)[0]
 
 def p64l(data):
-    struct.pack(">Q",data)
+    return struct.pack(">Q",data)
 
 def p32l(data):
-    struct.pack(">I",data)
+    return struct.pack(">I",data)
 
 def p16l(data):
-    struct.pack(">H",data)
+    return struct.pack(">H",data)
 
 def b64e(data):
     return base64.b64encode(data)
