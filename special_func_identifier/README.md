@@ -41,7 +41,7 @@ __int64 __fastcall sub_13516(__int64 a1)
 __int64 __fastcall getvalue_15f66(__int64 a1)
 {
   return *(_QWORD *)a1;
-
+}
 ```
 
 
